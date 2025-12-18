@@ -3,142 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reel Evolution - Oficial</title>
+    <title>Reel Evolution v3</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
         :root { --primary: #e50914; --bg: #050505; --premium: #ffbb00; --text: #fff; --glass: rgba(255, 255, 255, 0.08); }
-        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
         
-        .tela { display: none; min-height: 100vh; width: 100vw; flex-direction: column; align-items: center; animation: fadeIn 0.3s ease; }
+        /* Sistema de Telas */
+        .tela { display: none; min-height: 100vh; width: 100vw; flex-direction: column; align-items: center; animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .tela.ativa { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(1.02); } to { opacity: 1; transform: scale(1); } }
 
-        .glass { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; }
+        /* Estilo Vidro Premium */
+        .glass { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; }
 
-        /* BOTÃO "+" GRANDE PARA PERFIL */
+        /* BOTÃO "+" REESTILIZADO */
         .btn-novo-perfil {
-            width: 120px; height: 120px; 
-            border: 3px dashed #444; border-radius: 25px; 
+            width: 130px; height: 130px; 
+            border: 2px dashed #444; border-radius: 20%; 
             display: flex; align-items: center; justify-content: center; 
-            font-size: 60px; color: #444; cursor: pointer; transition: 0.3s;
+            font-size: 50px; color: #666; cursor: pointer; transition: 0.3s;
+            margin-bottom: 25px;
         }
-        .btn-novo-perfil:hover { border-color: var(--primary); color: var(--primary); background: rgba(229, 9, 20, 0.1); }
+        .btn-novo-perfil:active { transform: scale(0.9); border-color: var(--primary); color: var(--primary); }
 
-        .perfil-card { width: 120px; text-align: center; cursor: pointer; }
-        .perfil-img { width: 120px; height: 120px; background: #1a1a1a; border-radius: 25px; border: 3px solid #333; display: flex; align-items: center; justify-content: center; font-size: 50px; color: var(--primary); transition: 0.3s; }
-        .perfil-card:hover .perfil-img { border-color: var(--primary); transform: translateY(-5px); }
+        .perfil-img { 
+            width: 130px; height: 130px; background: linear-gradient(45deg, #1a1a1a, #333); 
+            border-radius: 20%; border: 3px solid transparent; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 55px; color: white; transition: 0.3s;
+        }
+        .perfil-card:active .perfil-img { border-color: var(--primary); transform: scale(0.95); }
 
-        /* BARRA DE PESQUISA */
-        .search-container { width: 90%; max-width: 600px; margin: 20px 0; }
-        .search-bar { width: 100%; padding: 15px 25px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); background: var(--glass); color: white; font-size: 16px; outline: none; }
-        .search-bar:focus { border-color: var(--primary); }
+        /* BUSCA FLUTUANTE */
+        .search-box {
+            width: 90%; max-width: 500px; margin: 20px 0;
+            display: flex; align-items: center; background: var(--glass);
+            border-radius: 15px; padding: 5px 15px; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .search-box input { background: none; border: none; color: white; padding: 12px; width: 100%; outline: none; font-size: 16px; }
 
-        /* PLAYER ESTILO CINEMA */
-        #t-player { background: #000; position: fixed; inset: 0; z-index: 9999; justify-content: center; }
-        .btn-voltar-player { position: absolute; top: 20px; left: 20px; background: rgba(40,40,40,0.9); color: white; border: 1px solid #555; padding: 12px 25px; border-radius: 50px; cursor: pointer; font-weight: bold; z-index: 100; }
-        .video-wrapper { width: 95%; max-width: 1100px; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid #222; }
+        /* PLAYER CINEMATOGRÁFICO */
+        #t-player { background: #000; position: fixed; inset: 0; z-index: 10000; }
+        .player-header { position: absolute; top: 0; left: 0; width: 100%; padding: 20px; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); z-index: 10; display: flex; align-items: center; }
+        .video-container { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #000; }
         iframe { width: 100%; height: 100%; border: none; }
 
-        /* CATÁLOGO */
-        .header-home { width: 90%; max-width: 1200px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .cat-row { width: 90%; max-width: 1200px; margin-bottom: 30px; text-align: left; }
-        .row-items { display: flex; gap: 15px; overflow-x: auto; padding: 10px 0; scrollbar-width: none; }
-        .filme-card { min-width: 170px; height: 250px; background: #1a1a1a; border-radius: 15px; overflow: hidden; transition: 0.3s; cursor: pointer; flex-shrink: 0; border: 1px solid #222; }
+        /* GRID DE FILMES */
+        .row-items { display: flex; gap: 12px; overflow-x: auto; padding: 10px 5%; scrollbar-width: none; }
+        .row-items::-webkit-scrollbar { display: none; }
+        .filme-card { min-width: 130px; height: 190px; background: #111; border-radius: 12px; overflow: hidden; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         .filme-card img { width: 100%; height: 100%; object-fit: cover; }
-        .filme-card:hover { transform: scale(1.05); border-color: var(--primary); }
 
-        .btn-main { background: var(--primary); color: white; padding: 15px; border: none; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; font-size: 16px; }
-        input, select, textarea { width: 100%; padding: 14px; margin: 10px 0; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid #333; color: #fff; box-sizing: border-box; }
+        /* BOTÕES */
+        .btn-main { background: var(--primary); color: white; padding: 16px; border: none; border-radius: 15px; width: 100%; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.2s; }
+        .btn-main:active { opacity: 0.8; transform: scale(0.98); }
+        
+        textarea { width: 100%; height: 120px; background: rgba(0,0,0,0.3); border: 1px solid #333; color: #00ff00; font-family: monospace; padding: 10px; border-radius: 10px; font-size: 12px; }
     </style>
 </head>
 <body>
 
     <div id="t-perfis" class="tela ativa">
-        <h1 style="margin-top:60px; font-size: 35px;">REEL<span style="color:var(--primary)">EVOLUTION</span></h1>
-        <p style="color: #888;">Selecione seu perfil para assistir</p>
-        <div id="lista-p" style="display:flex; gap:25px; margin-top:40px; flex-wrap: wrap; justify-content: center; width: 90%;"></div>
-        
-        <div style="margin-top: 50px; display: flex; flex-direction: column; gap: 15px; align-items: center;">
-            <button class="glass" onclick="ir('t-sync')" style="padding: 12px 40px; color:white; cursor:pointer; font-weight: bold;">🔄 SINCRONIZAR APP</button>
-            <button onclick="ir('t-adm-login')" style="background:none; border:none; color:#1a1a1a; font-size:12px; cursor:pointer;">PAINEL ADM</button>
-        </div>
+        <h1 style="margin-top:80px; font-size: 28px; letter-spacing: 2px;">REEL<span style="color:var(--primary)">EVOLUTION</span></h1>
+        <div id="lista-p" style="display:flex; gap:20px; margin-top:50px; flex-wrap: wrap; justify-content: center; padding: 0 20px;"></div>
+        <button class="glass" onclick="ir('t-sync')" style="margin-top:60px; padding: 12px 30px; color:#aaa; font-size:12px; cursor:pointer; border:none;">SINCRONIZAR DADOS</button>
+        <div onclick="ir('t-adm-login')" style="position:fixed; bottom:20px; color:#1a1a1a; font-size:10px;">CONFIG</div>
     </div>
 
     <div id="t-home" class="tela">
-        <div class="header-home glass" style="margin-top: 15px;">
-            <div><b id="user-n" style="font-size: 18px;">Olá</b><br><small id="status-txt" style="letter-spacing: 1px;"></small></div>
-            <button onclick="ir('t-plano')" style="background:var(--premium); border:none; padding:10px 20px; border-radius:50px; font-weight:bold; cursor:pointer; color: black;">💎 PREMIUM</button>
+        <div style="width:90%; display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+            <div style="line-height:1.2"><small style="color:#666">Perfil</small><br><b id="user-n"></b></div>
+            <button onclick="ir('t-plano')" style="background:var(--premium); border:none; padding:8px 15px; border-radius:10px; font-weight:bold; font-size:12px;">ATIVAR PREMIUM</button>
         </div>
 
-        <div class="search-container">
-            <input type="text" id="busca" class="search-bar" placeholder="Pesquisar filmes, séries..." oninput="filtrarFilmes()">
+        <div class="search-box">
+            <input type="text" id="busca" placeholder="O que vamos assistir hoje?" oninput="renderHome(this.value)">
         </div>
 
-        <div id="container-rows" style="width:100%; display:flex; flex-direction:column; align-items:center; padding-bottom: 50px;"></div>
+        <div id="container-rows" style="width:100%; margin-bottom: 50px;"></div>
     </div>
 
     <div id="t-player" class="tela">
-        <button class="btn-voltar-player" onclick="fecharPlayer()">← VOLTAR AO CATÁLOGO</button>
-        <div class="video-wrapper" id="video-content"></div>
-    </div>
-
-    <div id="t-adm-login" class="tela">
-        <div class="glass" style="padding:40px; width:320px; margin-top: 100px;">
-            <h2 style="margin-top: 0;">Acesso Restrito</h2>
-            <input type="password" id="pass-adm" placeholder="Senha Administrativa">
-            <button onclick="loginAdm()" class="btn-main">ENTRAR NO PAINEL</button>
-            <button onclick="ir('t-perfis')" style="background:none; border:none; color:#666; margin-top: 15px; cursor:pointer;">Voltar</button>
+        <div class="player-header">
+            <button onclick="fecharPlayer()" style="background:rgba(255,255,255,0.1); border:none; color:white; padding:10px 20px; border-radius:10px; font-weight:bold;">← VOLTAR</button>
+            <span id="video-titulo" style="margin-left:20px; font-weight:bold; font-size:14px; color:#eee;"></span>
         </div>
+        <div class="video-container" id="video-content"></div>
     </div>
 
     <div id="t-adm-painel" class="tela">
-        <div class="glass" style="padding:30px; width:90%; max-width:450px; margin: 30px 0;">
-            <h3 style="color: var(--primary);">Gerenciar Catálogo</h3>
-            <input type="text" id="f-tit" placeholder="Título do Filme">
-            <input type="text" id="f-url" placeholder="ID ou Link do Google Drive">
-            <input type="text" id="f-capa" placeholder="Link da Imagem da Capa">
+        <div class="glass" style="padding:25px; width:85%; max-width:400px; margin-top:40px;">
+            <h3 style="margin-top:0">Novo Filme</h3>
+            <input type="text" id="f-tit" placeholder="Título">
+            <input type="text" id="f-url" placeholder="Link/ID Drive">
+            <input type="text" id="f-capa" placeholder="URL da Capa">
             <select id="f-cat">
                 <option value="Lançamentos">Lançamentos</option>
                 <option value="Ação">Ação</option>
                 <option value="Terror">Terror</option>
-                <option value="Comédia">Comédia</option>
+                <option value="Séries">Séries</option>
             </select>
-            <button onclick="addF()" class="btn-main" style="background: #28a745;">SALVAR FILME</button>
-            
-            <hr style="border: 0; border-top: 1px solid #333; margin: 25px 0;">
-            
-            <p style="font-size: 13px; color: #888;">Use o código abaixo para enviar seus filmes para outro celular:</p>
-            <button onclick="copiarSync()" class="btn-main" style="background:#007bff;">COPIAR CÓDIGO DE SINCRONIZAÇÃO</button>
-            
-            <button onclick="ir('t-perfis')" style="margin-top:20px; background:none; color:white; border:none; cursor:pointer; width: 100%;">SAIR DO PAINEL</button>
+            <button onclick="addF()" class="btn-main">SALVAR NO DISPOSITIVO</button>
+            <hr style="border:0; border-top:1px solid #222; margin:20px 0;">
+            <button onclick="copiarSyncSuperCurto()" class="btn-main" style="background:#007bff;">GERAR CÓDIGO ULTRA CURTO</button>
+            <button onclick="ir('t-perfis')" style="background:none; border:none; color:#666; width:100%; margin-top:15px;">SAIR</button>
         </div>
     </div>
 
     <div id="t-sync" class="tela">
-        <div class="glass" style="padding:30px; width:320px; margin-top: 100px;">
-            <h2>Sincronizar</h2>
-            <p style="font-size: 14px; color: #888;">Cole o código curto recebido para atualizar seu catálogo.</p>
-            <textarea id="input-sync" style="height:120px;" placeholder="Cole aqui..."></textarea>
-            <button onclick="importar()" class="btn-main">ATUALIZAR TUDO</button>
-            <button onclick="ir('t-perfis')" style="background:none; border:none; color:#666; margin-top: 15px; cursor:pointer;">Cancelar</button>
+        <div class="glass" style="padding:25px; width:85%; max-width:320px; margin-top:100px;">
+            <h3>Sincronizar</h3>
+            <textarea id="input-sync" placeholder="Cole o código aqui..."></textarea>
+            <button onclick="importarSuperCurto()" class="btn-main" style="margin-top:15px;">ATUALIZAR CATÁLOGO</button>
+            <button onclick="ir('t-perfis')" style="background:none; border:none; color:#666; width:100%; margin-top:15px;">CANCELAR</button>
+        </div>
+    </div>
+
+    <div id="t-adm-login" class="tela">
+        <div class="glass" style="padding:30px; margin-top:100px;">
+            <input type="password" id="pass-adm" placeholder="Senha ADM">
+            <button onclick="loginAdm()" class="btn-main">ENTRAR</button>
         </div>
     </div>
 
     <div id="t-plano" class="tela">
-        <div class="glass" style="padding:40px; width:320px; margin-top: 100px; text-align: center;">
-            <h2 style="color:var(--premium)">Ativar Premium</h2>
-            <p style="font-size: 14px; color: #aaa;">Insira sua chave de acesso para liberar todos os conteúdos.</p>
+        <div class="glass" style="padding:30px; margin-top:100px; text-align:center; width:80%;">
+            <h2 style="color:var(--premium)">Premium</h2>
+            <p style="color:#666; font-size:13px;">Insira a chave REEL para liberar o acesso total.</p>
             <input type="text" id="chave-input" placeholder="REEL-XXXX">
-            <button onclick="ativarChave()" class="btn-main">ATIVAR AGORA</button>
-            <button onclick="ir('t-home')" style="margin-top:20px; background:none; border:none; color:#666; cursor:pointer;">Voltar</button>
+            <button onclick="ativarChave()" class="btn-main">ATIVAR ACESSO</button>
+            <button onclick="ir('t-home')" style="background:none; border:none; color:#666; margin-top:15px;">VOLTAR</button>
         </div>
     </div>
 
     <script>
-        // Versão do Banco de Dados para evitar conflitos
-        let db = JSON.parse(localStorage.getItem('reel_v20')) || [];
+        let db = JSON.parse(localStorage.getItem('reel_v30')) || [];
         let user = null;
 
         function ir(id) {
@@ -152,153 +154,96 @@
         function renderPerfis() {
             const cont = document.getElementById('lista-p');
             cont.innerHTML = '';
-            
-            // Renderiza perfis salvos
             Object.keys(localStorage).forEach(k => {
-                if(k.startsWith('perfil_v20_')) {
+                if(k.startsWith('per_v30_')) {
                     let p = JSON.parse(localStorage.getItem(k));
                     let d = document.createElement('div');
                     d.className = 'perfil-card';
-                    d.innerHTML = `<div class="perfil-img">${p.nome[0].toUpperCase()}</div><p style="font-weight:bold; margin-top:10px;">${p.nome}</p>`;
+                    d.innerHTML = `<div class="perfil-img">${p.nome[0].toUpperCase()}</div><p style="font-size:14px; font-weight:bold; margin-top:8px;">${p.nome}</p>`;
                     d.onclick = () => { user = p; ir('t-home'); };
                     cont.appendChild(d);
                 }
             });
-
-            // O "+" GRANDE SEMPRE NO FINAL
-            let btnNovo = document.createElement('div');
-            btnNovo.className = 'btn-novo-perfil';
-            btnNovo.innerHTML = '+';
-            btnNovo.onclick = () => { 
-                let n = prompt("Nome do novo perfil:"); 
-                if(n){ 
-                    let id = 'perfil_v20_' + Date.now();
-                    localStorage.setItem(id, JSON.stringify({id: id, nome: n, expira: 0})); 
-                    renderPerfis(); 
-                } 
+            let add = document.createElement('div');
+            add.className = 'btn-novo-perfil';
+            add.innerHTML = '+';
+            add.onclick = () => { 
+                let n = prompt("Nome:"); 
+                if(n){ let id='per_v30_'+Date.now(); localStorage.setItem(id, JSON.stringify({id, nome:n, expira:0})); renderPerfis(); }
             };
-            cont.appendChild(btnNovo);
+            cont.appendChild(add);
         }
 
-        function renderHome(filtro = "") {
-            document.getElementById('user-n').innerText = "Olá, " + user.nome;
+        function renderHome(f = "") {
+            document.getElementById('user-n').innerText = user.nome;
             const exp = user.expira > Date.now();
-            document.getElementById('status-txt').innerText = exp ? "PLATINUM ATIVO" : "CONTA LIMITADA";
-            document.getElementById('status-txt').style.color = exp ? "gold" : "#e50914";
-
             const cont = document.getElementById('container-rows');
             cont.innerHTML = '';
+            
+            const filtrados = db.filter(i => i.t.toLowerCase().includes(f.toLowerCase()));
+            const cats = [...new Set(filtrados.map(i => i.c))];
 
-            const filmesFiltrados = db.filter(f => f.tit.toLowerCase().includes(filtro.toLowerCase()));
-            const categorias = [...new Set(filmesFiltrados.map(f => f.cat))];
-
-            if(filmesFiltrados.length === 0) {
-                cont.innerHTML = '<p style="margin-top:50px; color:#555;">Nenhum filme encontrado...</p>';
-                return;
-            }
-
-            categorias.forEach(cat => {
-                let section = document.createElement('div');
-                section.className = 'cat-row';
-                section.innerHTML = `<h3 style="margin-left: 5px;">${cat}</h3><div class="row-items"></div>`;
-                
-                filmesFiltrados.filter(f => f.cat === cat).forEach(f => {
+            cats.forEach(cat => {
+                let div = document.createElement('div');
+                div.innerHTML = `<h4 style="margin:20px 5% 10px 5%; color:#888; font-size:13px; text-transform:uppercase;">${cat}</h4><div class="row-items"></div>`;
+                filtrados.filter(i => i.c === cat).forEach(item => {
                     let card = document.createElement('div');
                     card.className = 'filme-card';
-                    card.innerHTML = `<img src="${f.capa}">`;
-                    card.onclick = () => { 
-                        if(exp) abrirPlayer(f); 
-                        else ir('t-plano'); 
-                    };
-                    section.querySelector('.row-items').appendChild(card);
+                    card.innerHTML = `<img src="${item.i}">`;
+                    card.onclick = () => { if(exp) abrir(item); else ir('t-plano'); };
+                    div.querySelector('.row-items').appendChild(card);
                 });
-                cont.appendChild(section);
+                cont.appendChild(div);
             });
         }
 
-        function filtrarFilmes() {
-            renderHome(document.getElementById('busca').value);
-        }
-
-        function abrirPlayer(f) {
+        function abrir(item) {
             ir('t-player');
-            const videoId = f.url.match(/[-\w]{25,}/);
-            const linkFinal = videoId ? `https://drive.google.com/file/d/${videoId[0]}/preview` : f.url;
-            
-            document.getElementById('video-content').innerHTML = `
-                <iframe src="${linkFinal}" 
-                allow="autoplay; fullscreen" 
-                sandbox="allow-forms allow-scripts allow-pointer-lock allow-same-origin allow-top-navigation" 
-                allowfullscreen></iframe>`;
+            document.getElementById('video-titulo').innerText = item.t;
+            const vid = item.u.length > 20 ? item.u.match(/[-\w]{25,}/)[0] : item.u;
+            document.getElementById('video-content').innerHTML = `<iframe src="https://drive.google.com/file/d/${vid}/preview" allow="autoplay; fullscreen" sandbox="allow-forms allow-scripts allow-same-origin allow-top-navigation" allowfullscreen></iframe>`;
         }
 
-        function fecharPlayer() { 
-            document.getElementById('video-content').innerHTML = ''; 
-            ir('t-home'); 
-        }
+        function fecharPlayer() { document.getElementById('video-content').innerHTML = ''; ir('t-home'); }
 
-        function loginAdm() {
-            const senha = document.getElementById('pass-adm').value;
-            if(['Nicolas','Yudi','Opanioto'].includes(senha)) {
-                ir('t-adm-painel');
-            } else {
-                alert("Senha incorreta!");
-            }
-        }
+        function loginAdm() { if(['Nicolas','Yudi'].includes(document.getElementById('pass-adm').value)) ir('t-adm-painel'); }
 
         function addF() {
-            const t = document.getElementById('f-tit').value;
-            const u = document.getElementById('f-url').value;
-            const c = document.getElementById('f-capa').value;
-            const cat = document.getElementById('f-cat').value;
-
-            if(t && u && c) {
-                db.push({tit: t, url: u, capa: c, cat: cat});
-                localStorage.setItem('reel_v20', JSON.stringify(db));
-                alert("Filme adicionado com sucesso!");
-                document.getElementById('f-tit').value = '';
-                document.getElementById('f-url').value = '';
-                document.getElementById('f-capa').value = '';
-            } else {
-                alert("Preencha todos os campos!");
-            }
+            const t=document.getElementById('f-tit').value, u=document.getElementById('f-url').value, i=document.getElementById('f-capa').value, c=document.getElementById('f-cat').value;
+            if(t&&u){ db.push({t, u, i, c}); localStorage.setItem('reel_v30', JSON.stringify(db)); alert("Salvo!"); }
         }
 
-        // SINCRONIZAÇÃO ULTRA CURTA (Base64)
-        function copiarSync() {
-            if(db.length === 0) return alert("Adicione filmes antes de copiar!");
-            const codigoCurto = btoa(unescape(encodeURIComponent(JSON.stringify(db))));
-            navigator.clipboard.writeText(codigoCurto);
-            alert("Código CURTO copiado para o WhatsApp!");
+        // --- SISTEMA DE SINCRONIZAÇÃO ULTRA CURTO ---
+        function copiarSyncSuperCurto() {
+            // Simplifica os dados para carregar menos texto
+            const compact = db.map(f => {
+                const id = f.u.match(/[-\w]{25,}/);
+                return [f.t, id ? id[0] : f.u, f.i, f.c];
+            });
+            const hash = btoa(unescape(encodeURIComponent(JSON.stringify(compact))));
+            navigator.clipboard.writeText(hash);
+            alert("Código Ultra Curto Copiado!");
         }
 
-        function importar() {
+        function importarSuperCurto() {
             try {
-                const cod = document.getElementById('input-sync').value;
-                const dados = JSON.parse(decodeURIComponent(escape(atob(cod))));
-                db = dados;
-                localStorage.setItem('reel_v20', JSON.stringify(db));
-                alert("Catálogo atualizado com sucesso!");
-                ir('t-perfis');
-            } catch(e) {
-                alert("Código inválido ou corrompido!");
-            }
+                const hash = document.getElementById('input-sync').value;
+                const raw = JSON.parse(decodeURIComponent(escape(atob(hash))));
+                db = raw.map(f => ({ t: f[0], u: f[1], i: f[2], c: f[3] }));
+                localStorage.setItem('reel_v30', JSON.stringify(db));
+                alert("Sincronizado!"); ir('t-perfis');
+            } catch(e) { alert("Código inválido!"); }
         }
 
         function ativarChave() {
-            const chave = document.getElementById('chave-input').value;
-            if(chave.toUpperCase().includes("REEL")) {
-                user.expira = Date.now() + (30 * 24 * 60 * 60 * 1000); // 30 dias
+            if(document.getElementById('chave-input').value.includes("REEL")){
+                user.expira = Date.now() + 2592000000;
                 localStorage.setItem(user.id, JSON.stringify(user));
-                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-                alert("PREMIUM ATIVADO COM SUCESSO!");
-                ir('t-home');
-            } else {
-                alert("Chave inválida!");
+                confetti({ particleCount:150, spread:70, origin:{y:0.6} });
+                alert("PREMIUM ATIVADO!"); ir('t-home');
             }
         }
 
-        // Inicia o App
         renderPerfis();
     </script>
 </body>
